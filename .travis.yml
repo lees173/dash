@@ -67,11 +67,14 @@ before_script:
 script:
     - export TRAVIS_COMMIT_LOG=`git log --format=fuller -1`
     # Our scripts try to be Travis agnostic
-    - $DOCKER_RUN_IN_BUILDER ./ci/build_depends.sh
-    - $DOCKER_RUN_IN_BUILDER ./ci/build_src.sh
-    - travis_wait 30 $DOCKER_RUN_IN_BUILDER ./ci/test_unittests.sh
-    - $DOCKER_RUN_IN_BUILDER ./ci/test_integrationtests.sh
-    - if [ "$DOCKER_BUILD" = "true" ]; then BUILD_DIR=build-ci/dashcore-$BUILD_TARGET ./docker/build-docker.sh; fi
+    - $DOCKER_RUN_IN_BUILDER ./ci/build_depends.sh;
+    # Skip Dash Core build if depends build take more than 20 mins.
+    - if [ $SECONDS -lt 1200 ]; then $DOCKER_RUN_IN_BUILDER ./ci/build_src.sh && export SRC_BUILT="true"; fi
+    - if [ "$SRC_BUILT" = "true" ]; then
+        travis_wait 30 $DOCKER_RUN_IN_BUILDER ./ci/test_unittests.sh;
+        $DOCKER_RUN_IN_BUILDER ./ci/test_integrationtests.sh;
+        if [ "$DOCKER_BUILD" = "true" ]; then BUILD_DIR=build-ci/dashcore-$BUILD_TARGET ./docker/build-docker.sh; fi;
+      fi;
 after_script:
     - echo $TRAVIS_COMMIT_RANGE
     - echo $TRAVIS_COMMIT_LOG

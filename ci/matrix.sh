@@ -77,7 +77,6 @@ elif [ "$BUILD_TARGET" = "linux64_release" ]; then
   export HOST=x86_64-unknown-linux-gnu
   export PACKAGES="bc python3-zmq"
   export DEP_OPTS="NO_QT=1 NO_UPNP=1"
-  export GOAL="install"
   export BITCOIN_CONFIG="--enable-zmq --enable-glibc-back-compat --enable-reduce-exports"
   export PYZMQ=true
 elif [ "$BUILD_TARGET" = "mac" ]; then
